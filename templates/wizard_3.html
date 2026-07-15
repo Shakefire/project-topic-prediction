@@ -1,0 +1,233 @@
+{% extends "wizard_base.html" %}
+
+{% block title %}Research Interests - Step 3{% endblock %}
+
+{% block content %}
+<div class="wizard-card">
+    <h1 class="wizard-title">Research Interests</h1>
+    <p class="wizard-subtitle">Select up to 3 areas you're interested in</p>
+    
+    <form method="POST" action="/wizard/3">
+        <!-- Interest Cards -->
+        <div class="interest-grid mb-4">
+            {% for interest, info in research_interests.items() %}
+            <div class="interest-card" id="card-{{ loop.index }}" onclick="toggleInterest(this, {{ loop.index }})">
+                <div class="interest-header">
+                    <div class="interest-icon" style="background: {{ info.color }}20; color: {{ info.color }};">
+                        <i class="{{ info.icon }}"></i>
+                    </div>
+                    <div class="interest-check">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+                <h3 class="interest-name">{{ interest }}</h3>
+                
+                <div class="subfields" id="subfields-{{ loop.index }}" style="display: none;">
+                    {% for subfield in info.subfields %}
+                    <label class="subfield-item" onclick="event.stopPropagation()">
+                        <input type="checkbox" name="interests" value="{{ subfield }}"
+                               {% if subfield in session.get('interests', []) %}checked{% endif %}>
+                        <span class="subfield-chip">{{ subfield }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Selected Count -->
+        <div class="selected-count mb-4">
+            <span id="selectedCount">0</span> of 3 areas selected
+        </div>
+        
+        <!-- Navigation -->
+        <div class="wizard-nav">
+            <a href="/wizard/2" class="btn-wizard btn-back">
+                <i class="fas fa-arrow-left"></i>
+                Back
+            </a>
+            <button type="submit" class="btn-wizard btn-next" id="nextBtn">
+                Get Recommendations
+                <i class="fas fa-magic"></i>
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .interest-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+    
+    .interest-card {
+        background: var(--bg);
+        border: 2px solid var(--border);
+        border-radius: 16px;
+        padding: 1.25rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .interest-card:hover {
+        border-color: var(--primary-light);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .interest-card.selected {
+        border-color: var(--primary-light);
+        background: rgba(59, 130, 246, 0.05);
+    }
+    
+    .interest-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+    }
+    
+    .interest-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+    
+    .interest-check {
+        color: var(--border);
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .interest-card.selected .interest-check {
+        color: var(--primary-light);
+    }
+    
+    .interest-name {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .subfields {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+    }
+    
+    .subfield-item {
+        display: block;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+    }
+    
+    .subfield-item input {
+        display: none;
+    }
+    
+    .subfield-chip {
+        display: inline-block;
+        padding: 6px 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 50px;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+    
+    .subfield-item:hover .subfield-chip {
+        border-color: var(--primary-light);
+    }
+    
+    .subfield-item input:checked + .subfield-chip {
+        background: var(--primary-light);
+        color: white;
+        border-color: var(--primary-light);
+    }
+    
+    .selected-count {
+        text-align: center;
+        padding: 1rem;
+        background: var(--bg);
+        border-radius: 12px;
+        font-weight: 500;
+        color: var(--text-muted);
+    }
+    
+    .selected-count span {
+        font-weight: 700;
+        color: var(--primary-light);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let selectedInterests = new Set();
+    const maxInterests = 3;
+    
+    function toggleInterest(card, index) {
+        const subfields = document.getElementById(`subfields-${index}`);
+        
+        if (card.classList.contains('selected')) {
+            // Deselect
+            card.classList.remove('selected');
+            subfields.style.display = 'none';
+            selectedInterests.delete(index);
+            
+            // Uncheck all subfields
+            subfields.querySelectorAll('input').forEach(input => {
+                input.checked = false;
+            });
+        } else {
+            // Check if max reached
+            if (selectedInterests.size >= maxInterests) {
+                alert('You can select up to 3 research areas');
+                return;
+            }
+            
+            // Select
+            card.classList.add('selected');
+            subfields.style.display = 'block';
+            selectedInterests.add(index);
+        }
+        
+        updateCount();
+    }
+    
+    function updateCount() {
+        document.getElementById('selectedCount').textContent = selectedInterests.size;
+        
+        const nextBtn = document.getElementById('nextBtn');
+        if (selectedInterests.size === 0) {
+            nextBtn.disabled = true;
+            nextBtn.style.opacity = '0.5';
+        } else {
+            nextBtn.disabled = false;
+            nextBtn.style.opacity = '1';
+        }
+    }
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if any interests were previously selected
+        const cards = document.querySelectorAll('.interest-card');
+        cards.forEach((card, index) => {
+            const subfields = card.querySelectorAll('input:checked');
+            if (subfields.length > 0) {
+                card.classList.add('selected');
+                document.getElementById(`subfields-${index + 1}`).style.display = 'block';
+                selectedInterests.add(index + 1);
+            }
+        });
+        
+        updateCount();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends "wizard_base.html" %}
+
+{% block title %}Academic Profile - Step 1{% endblock %}
+
+{% block content %}
+<div class="wizard-card">
+    <h1 class="wizard-title">Academic Profile</h1>
+    <p class="wizard-subtitle">Tell us about your academic background</p>
+    
+    <form method="POST" action="/wizard/1">
+        <!-- Department -->
+        <div class="mb-4">
+            <label class="form-label fw-semibold mb-3">Department</label>
+            <div class="dept-grid">
+                {% set dept_icons = {
+                    'Computer Science': 'fas fa-laptop-code',
+                    'Cybersecurity': 'fas fa-shield-alt',
+                    'Software Engineering': 'fas fa-code',
+                    'Information Systems': 'fas fa-database',
+                    'Information Technology': 'fas fa-network-wired'
+                } %}
+                
+                {% for dept in departments %}
+                <div class="dept-card {% if session.get('department') == dept %}selected{% endif %}" 
+                     onclick="selectCard(this, 'department', '{{ dept }}')">
+                    <input type="radio" name="department" value="{{ dept }}" 
+                           {% if session.get('department') == dept %}checked{% endif %}>
+                    <div class="dept-icon">
+                        <i class="{{ dept_icons.get(dept, 'fas fa-graduation-cap') }}"></i>
+                    </div>
+                    <div class="dept-name">{{ dept }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Level -->
+        <div class="mb-4">
+            <label class="form-label fw-semibold mb-3">Current Level</label>
+            <div class="level-grid">
+                <div class="level-card {% if session.get('year_level', '3') == '3' %}selected{% endif %}"
+                     onclick="selectCard(this, 'level', '3')">
+                    <input type="radio" name="year_level" value="3"
+                           {% if session.get('year_level', '3') == '3' %}checked{% endif %}>
+                    <div class="level-number">300</div>
+                    <div class="level-text">Level</div>
+                </div>
+                
+                <div class="level-card {% if session.get('year_level') == '4' %}selected{% endif %}"
+                     onclick="selectCard(this, 'level', '4')">
+                    <input type="radio" name="year_level" value="4"
+                           {% if session.get('year_level') == '4' %}checked{% endif %}>
+                    <div class="level-number">400</div>
+                    <div class="level-text">Level</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CGPA Slider -->
+        <div class="mb-4">
+            <div class="slider-container">
+                <div class="slider-label">
+                    <label class="form-label fw-semibold mb-0">Cumulative GPA (CGPA)</label>
+                    <span class="slider-value" id="gpaValue">{{ session.get('gpa', '3.00') }}</span>
+                </div>
+                <input type="range" class="form-range" id="gpaSlider" name="gpa" 
+                       min="1.0" max="5.0" step="0.01" value="{{ session.get('gpa', '3.0') }}"
+                       oninput="updateSlider('gpa', this.value)">
+                <div class="d-flex justify-content-between">
+                    <small class="text-muted">1.00</small>
+                    <small class="text-muted">5.00</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Computing Grade Slider -->
+        <div class="mb-4">
+            <div class="slider-container">
+                <div class="slider-label">
+                    <label class="form-label fw-semibold mb-0">Average Computing Grade</label>
+                    <span class="slider-value" id="csGradeValue">{{ session.get('avg_cs_grade', '3.00') }}</span>
+                </div>
+                <input type="range" class="form-range" id="csGradeSlider" name="avg_cs_grade" 
+                       min="1.0" max="5.0" step="0.01" value="{{ session.get('avg_cs_grade', '3.0') }}"
+                       oninput="updateSlider('csGrade', this.value)">
+                <div class="d-flex justify-content-between">
+                    <small class="text-muted">1.00</small>
+                    <small class="text-muted">5.00</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Difficulty -->
+        <div class="mb-4">
+            <label class="form-label fw-semibold mb-3">Preferred Project Difficulty</label>
+            <div class="diff-grid">
+                <div class="diff-card easy {% if session.get('preferred_difficulty', 'Medium') == 'Easy' %}selected{% endif %}"
+                     onclick="selectCard(this, 'diff', 'Easy')">
+                    <input type="radio" name="preferred_difficulty" value="Easy"
+                           {% if session.get('preferred_difficulty') == 'Easy' %}checked{% endif %}>
+                    <div class="diff-icon">🟢</div>
+                    <div class="diff-name">Easy</div>
+                    <div class="diff-desc">Beginner-friendly projects</div>
+                </div>
+                
+                <div class="diff-card medium {% if session.get('preferred_difficulty', 'Medium') == 'Medium' %}selected{% endif %}"
+                     onclick="selectCard(this, 'diff', 'Medium')">
+                    <input type="radio" name="preferred_difficulty" value="Medium"
+                           {% if session.get('preferred_difficulty', 'Medium') == 'Medium' %}checked{% endif %}>
+                    <div class="diff-icon">🟡</div>
+                    <div class="diff-name">Medium</div>
+                    <div class="diff-desc">Balanced complexity</div>
+                </div>
+                
+                <div class="diff-card hard {% if session.get('preferred_difficulty') == 'Hard' %}selected{% endif %}"
+                     onclick="selectCard(this, 'diff', 'Hard')">
+                    <input type="radio" name="preferred_difficulty" value="Hard"
+                           {% if session.get('preferred_difficulty') == 'Hard' %}checked{% endif %}>
+                    <div class="diff-icon">🔴</div>
+                    <div class="diff-name">Hard</div>
+                    <div class="diff-desc">Advanced projects</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="wizard-nav">
+            <a href="/" class="btn-wizard btn-back">
+                <i class="fas fa-arrow-left"></i>
+                Back
+            </a>
+            <button type="submit" class="btn-wizard btn-next">
+                Continue
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateSlider(type, value) {
+        const formatted = parseFloat(value).toFixed(2);
+        if (type === 'gpa') {
+            document.getElementById('gpaValue').textContent = formatted;
+        } else {
+            document.getElementById('csGradeValue').textContent = formatted;
+        }
+    }
+</script>
+{% endblock %}

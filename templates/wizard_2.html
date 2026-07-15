@@ -1,0 +1,250 @@
+{% extends "wizard_base.html" %}
+
+{% block title %}Skills & Experience - Step 2{% endblock %}
+
+{% block content %}
+<div class="wizard-card">
+    <h1 class="wizard-title">Skills & Experience</h1>
+    <p class="wizard-subtitle">Select your technical skills and tools</p>
+    
+    <form method="POST" action="/wizard/2">
+        <!-- Search Box -->
+        <div class="mb-4">
+            <div class="position-relative">
+                <input type="text" class="form-control form-control-lg" id="skillSearch" 
+                       placeholder="Search skills... (e.g., python, tf, react)" 
+                       style="padding-left: 2.5rem;">
+                <i class="fas fa-search position-absolute" style="left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+            </div>
+            <div id="searchResults" class="mt-2" style="display: none;"></div>
+        </div>
+        
+        <!-- Technology Categories -->
+        {% for category, techs in tech_categories.items() %}
+        <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-label fw-semibold mb-0">{{ category }}</label>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleCategory('{{ category }}')">
+                    Select All
+                </button>
+            </div>
+            
+            <div class="tech-chips" id="category-{{ category }}">
+                {% for tech in techs %}
+                <div class="tech-chip {% if tech.name in session.get('programming_languages', []) or tech.name in session.get('frameworks_tools', []) %}selected{% endif %}" 
+                     data-name="{{ tech.name }}" data-category="{{ category }}"
+                     onclick="toggleChip(this)">
+                    <input type="checkbox" name="{% if category == 'Programming' %}programming_languages{% else %}frameworks_tools{% endif %}" 
+                           value="{{ tech.name }}"
+                           {% if tech.name in session.get('programming_languages', []) or tech.name in session.get('frameworks_tools', []) %}checked{% endif %}>
+                    <i class="{{ tech.icon }}"></i>
+                    <span>{{ tech.name }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+        
+        <!-- Experience -->
+        <div class="mb-4">
+            <label class="form-label fw-semibold mb-3">Previous Projects</label>
+            <div class="level-grid">
+                <div class="level-card {% if session.get('num_past_projects', '0') == '0' %}selected{% endif %}"
+                     onclick="selectCard(this, 'exp', '0')">
+                    <input type="radio" name="num_past_projects" value="0"
+                           {% if session.get('num_past_projects', '0') == '0' %}checked{% endif %}>
+                    <div class="level-number">0</div>
+                    <div class="level-text">First Project</div>
+                </div>
+                
+                <div class="level-card {% if session.get('num_past_projects') == '1' %}selected{% endif %}"
+                     onclick="selectCard(this, 'exp', '1')">
+                    <input type="radio" name="num_past_projects" value="1"
+                           {% if session.get('num_past_projects') == '1' %}checked{% endif %}>
+                    <div class="level-number">1-2</div>
+                    <div class="level-text">Some Experience</div>
+                </div>
+                
+                <div class="level-card {% if session.get('num_past_projects') == '3' %}selected{% endif %}"
+                     onclick="selectCard(this, 'exp', '3')">
+                    <input type="radio" name="num_past_projects" value="3"
+                           {% if session.get('num_past_projects') == '3' %}checked{% endif %}>
+                    <div class="level-number">3+</div>
+                    <div class="level-text">Experienced</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="wizard-nav">
+            <a href="/wizard/1" class="btn-wizard btn-back">
+                <i class="fas fa-arrow-left"></i>
+                Back
+            </a>
+            <button type="submit" class="btn-wizard btn-next">
+                Continue
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .tech-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .tech-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        background: var(--bg);
+        border: 2px solid var(--border);
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+        user-select: none;
+    }
+    
+    .tech-chip:hover {
+        border-color: var(--primary-light);
+        background: rgba(59, 130, 246, 0.05);
+    }
+    
+    .tech-chip.selected {
+        border-color: var(--primary-light);
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--primary-light);
+    }
+    
+    .tech-chip.selected i {
+        color: var(--primary-light);
+    }
+    
+    .tech-chip input {
+        display: none;
+    }
+    
+    .tech-chip i {
+        font-size: 1rem;
+        color: var(--text-muted);
+    }
+    
+    #searchResults {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    .search-result-item {
+        padding: 10px 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: background 0.2s;
+    }
+    
+    .search-result-item:hover {
+        background: var(--bg);
+    }
+    
+    .search-result-item i {
+        color: var(--primary-light);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Fuzzy search functionality
+    const searchInput = document.getElementById('skillSearch');
+    const searchResults = document.getElementById('searchResults');
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            searchResults.style.display = 'none';
+            return;
+        }
+        
+        searchTimeout = setTimeout(() => {
+            fetch(`/api/search/tech?q=${encodeURIComponent(query)}`)
+                .then(r => r.json())
+                .then(results => {
+                    if (results.length === 0) {
+                        searchResults.style.display = 'none';
+                        return;
+                    }
+                    
+                    searchResults.innerHTML = results.map(name => `
+                        <div class="search-result-item" onclick="selectSearchResult('${name}')">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>${name}</span>
+                        </div>
+                    `).join('');
+                    searchResults.style.display = 'block';
+                });
+        }, 200);
+    });
+    
+    searchInput.addEventListener('blur', function() {
+        setTimeout(() => {
+            searchResults.style.display = 'none';
+        }, 200);
+    });
+    
+    function selectSearchResult(name) {
+        // Find and select the chip
+        const chips = document.querySelectorAll('.tech-chip');
+        chips.forEach(chip => {
+            if (chip.dataset.name === name) {
+                if (!chip.classList.contains('selected')) {
+                    toggleChip(chip);
+                }
+            }
+        });
+        
+        searchInput.value = '';
+        searchResults.style.display = 'none';
+    }
+    
+    function toggleChip(chip) {
+        chip.classList.toggle('selected');
+        const input = chip.querySelector('input');
+        input.checked = chip.classList.contains('selected');
+    }
+    
+    function toggleCategory(category) {
+        const container = document.getElementById(`category-${category}`);
+        const chips = container.querySelectorAll('.tech-chip');
+        const allSelected = Array.from(chips).every(c => c.classList.contains('selected'));
+        
+        chips.forEach(chip => {
+            if (allSelected) {
+                chip.classList.remove('selected');
+                chip.querySelector('input').checked = false;
+            } else {
+                chip.classList.add('selected');
+                chip.querySelector('input').checked = true;
+            }
+        });
+    }
+    
+    // Highlight matching text in search
+    function highlightMatch(text, query) {
+        if (!query) return text;
+        const regex = new RegExp(`(${query})`, 'gi');
+        return text.replace(regex, '<strong>$1</strong>');
+    }
+</script>
+{% endblock %}

@@ -1,97 +1,345 @@
-{% extends "base.html" %}
-
-{% block title %}Analytics - NAUB Project Advisor{% endblock %}
-
-{% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-10">
-        <!-- Header -->
-        <div class="text-center mb-4">
-            <h1 class="display-5 fw-bold text-white mb-3">
-                <i class="fas fa-chart-pie me-3"></i>
-                Recommendation Analytics
-            </h1>
-            <p class="lead text-white-50">
-                Insights into your project recommendations
-            </p>
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - NAUB Project Advisor</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #1E3A8A;
+            --primary-light: #3B82F6;
+            --accent: #10B981;
+            --bg: #0F172A;
+            --surface: rgba(30, 41, 59, 0.8);
+            --text: #F8FAFC;
+            --text-muted: #94A3B8;
+            --border: rgba(255, 255, 255, 0.1);
+            --glass: rgba(30, 41, 59, 0.6);
+        }
+        
+        [data-bs-theme="light"] {
+            --bg: #F1F5F9;
+            --surface: rgba(255, 255, 255, 0.8);
+            --text: #111827;
+            --text-muted: #6B7280;
+            --border: rgba(0, 0, 0, 0.1);
+            --glass: rgba(255, 255, 255, 0.6);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            background-image: 
+                radial-gradient(at 20% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .analytics-header {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .analytics-brand {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .analytics-brand i {
+            color: var(--primary-light);
+        }
+        
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card-title i {
+            color: var(--primary-light);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60A5FA, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        
+        .skill-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--primary-light);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin: 4px;
+        }
+        
+        .interest-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #10B981;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin: 4px;
+        }
+        
+        .progress-bar-custom {
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+        
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .metric-item:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .metric-value {
+            font-weight: 600;
+        }
+        
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border);
+            color: var(--text);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle:hover {
+            background: var(--primary-light);
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: var(--primary-light);
+            color: white;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+        
+        .no-data-icon {
+            font-size: 4rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="analytics-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="/" class="analytics-brand">
+                    <i class="fas fa-graduation-cap"></i>
+                    NAUB Project Advisor
+                </a>
+                <div class="d-flex gap-3">
+                    <a href="/" class="back-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Home
+                    </a>
+                    <a href="/wizard/1" class="back-btn">
+                        <i class="fas fa-redo"></i>
+                        New
+                    </a>
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <i class="fas fa-moon" id="themeIcon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Content -->
+    <main class="container py-4">
+        {% if not recommendations %}
+        <!-- No Data -->
+        <div class="no-data">
+            <div class="no-data-icon">
+                <i class="fas fa-chart-bar"></i>
+            </div>
+            <h2>No Analytics Available</h2>
+            <p class="text-muted mb-4">Generate recommendations first to view analytics</p>
+            <a href="/wizard/1" class="back-btn" style="background: var(--primary-light); color: white;">
+                <i class="fas fa-rocket"></i>
+                Get Started
+            </a>
         </div>
         
-        {% if student_profile and recommendations %}
-        
+        {% else %}
         <!-- Student Summary -->
-        <div class="card mb-4">
-            <div class="card-header py-3">
-                <h5 class="mb-0">
-                    <i class="fas fa-user me-2"></i>
-                    Student Profile Summary
-                </h5>
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="glass-card">
+                    <div class="card-title">
+                        <i class="fas fa-university"></i>
+                        Department
+                    </div>
+                    <div class="stat-value" style="font-size: 1.5rem;">{{ student_profile.department }}</div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <div class="d-flex align-items-center p-3 bg-light rounded">
-                            <div class="feature-icon me-3" style="width: 40px; height: 40px; font-size: 1rem;">
-                                <i class="fas fa-university"></i>
-                            </div>
-                            <div>
-                                <small class="text-muted">Department</small>
-                                <h6 class="mb-0 fw-bold">{{ student_profile.department }}</h6>
-                            </div>
-                        </div>
+            
+            <div class="col-md-3">
+                <div class="glass-card">
+                    <div class="card-title">
+                        <i class="fas fa-chart-line"></i>
+                        CGPA
                     </div>
-                    
-                    <div class="col-md-4">
-                        <div class="d-flex align-items-center p-3 bg-light rounded">
-                            <div class="feature-icon me-3" style="width: 40px; height: 40px; font-size: 1rem;">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div>
-                                <small class="text-muted">CGPA</small>
-                                <h6 class="mb-0 fw-bold">{{ student_profile.gpa }}</h6>
-                            </div>
-                        </div>
+                    <div class="stat-value">{{ student_profile.gpa }}</div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="glass-card">
+                    <div class="card-title">
+                        <i class="fas fa-signal"></i>
+                        Level
                     </div>
-                    
-                    <div class="col-md-4">
-                        <div class="d-flex align-items-center p-3 bg-light rounded">
-                            <div class="feature-icon me-3" style="width: 40px; height: 40px; font-size: 1rem;">
-                                <i class="fas fa-star"></i>
-                            </div>
-                            <div>
-                                <small class="text-muted">Preferred Difficulty</small>
-                                <h6 class="mb-0 fw-bold">{{ student_profile.preferred_difficulty }}</h6>
-                            </div>
-                        </div>
+                    <div class="stat-value" style="font-size: 1.5rem;">{{ student_profile.year_level }}00 Level</div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="glass-card">
+                    <div class="card-title">
+                        <i class="fas fa-star"></i>
+                        Difficulty
+                    </div>
+                    <div class="stat-value" style="font-size: 1.5rem;">{{ student_profile.preferred_difficulty }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Skills & Interests -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="glass-card">
+                    <div class="card-title">
+                        <i class="fas fa-code"></i>
+                        Technical Skills
+                    </div>
+                    <div>
+                        {% for skill in student_profile.programming_languages %}
+                        <span class="skill-badge">{{ skill }}</span>
+                        {% endfor %}
+                        {% for skill in student_profile.frameworks_tools %}
+                        <span class="skill-badge">{{ skill }}</span>
+                        {% endfor %}
                     </div>
                 </div>
-                
-                <!-- Skills and Interests -->
-                <div class="row mt-3">
-                    <div class="col-md-6">
-                        <h6 class="fw-bold">
-                            <i class="fas fa-code me-2 text-primary"></i>
-                            Technical Skills
-                        </h6>
-                        <div>
-                            {% for skill in student_profile.programming_languages %}
-                            <span class="badge bg-primary me-1 mb-1">{{ skill }}</span>
-                            {% endfor %}
-                            {% for skill in student_profile.frameworks_tools %}
-                            <span class="badge bg-secondary me-1 mb-1">{{ skill }}</span>
-                            {% endfor %}
-                        </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="glass-card">
+                    <div class="card-title">
+                        <i class="fas fa-flask"></i>
+                        Research Interests
                     </div>
-                    
-                    <div class="col-md-6">
-                        <h6 class="fw-bold">
-                            <i class="fas fa-flask me-2 text-success"></i>
-                            Research Interests
-                        </h6>
-                        <div>
-                            {% for interest in student_profile.interests %}
-                            <span class="tag-badge">{{ interest }}</span>
-                            {% endfor %}
-                        </div>
+                    <div>
+                        {% for interest in student_profile.interests %}
+                        <span class="interest-badge">{{ interest }}</span>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -99,36 +347,26 @@
         
         <!-- Charts Row 1 -->
         <div class="row g-4 mb-4">
-            <!-- Match Percentages Chart -->
             <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header py-3">
-                        <h5 class="mb-0">
-                            <i class="fas fa-percentage me-2"></i>
-                            Match Percentages
-                        </h5>
+                <div class="glass-card">
+                    <div class="card-title">
+                        <i class="fas fa-percentage"></i>
+                        Match Percentages
                     </div>
-                    <div class="card-body">
-                        <div class="chart-container">
-                            <canvas id="matchChart"></canvas>
-                        </div>
+                    <div class="chart-container">
+                        <canvas id="matchChart"></canvas>
                     </div>
                 </div>
             </div>
             
-            <!-- Research Area Distribution -->
             <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header py-3">
-                        <h5 class="mb-0">
-                            <i class="fas fa-microscope me-2"></i>
-                            Research Area Distribution
-                        </h5>
+                <div class="glass-card">
+                    <div class="card-title">
+                        <i class="fas fa-microscope"></i>
+                        Research Areas
                     </div>
-                    <div class="card-body">
-                        <div class="chart-container">
-                            <canvas id="researchChart"></canvas>
-                        </div>
+                    <div class="chart-container">
+                        <canvas id="researchChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -136,275 +374,198 @@
         
         <!-- Charts Row 2 -->
         <div class="row g-4 mb-4">
-            <!-- Difficulty Distribution -->
             <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header py-3">
-                        <h5 class="mb-0">
-                            <i class="fas fa-layer-group me-2"></i>
-                            Difficulty Distribution
-                        </h5>
+                <div class="glass-card">
+                    <div class="card-title">
+                        <i class="fas fa-layer-group"></i>
+                        Difficulty Distribution
                     </div>
-                    <div class="card-body">
-                        <div class="chart-container">
-                            <canvas id="difficultyChart"></canvas>
-                        </div>
+                    <div class="chart-container">
+                        <canvas id="difficultyChart"></canvas>
                     </div>
                 </div>
             </div>
             
-            <!-- AI Model Contribution -->
             <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header py-3">
-                        <h5 class="mb-0">
-                            <i class="fas fa-robot me-2"></i>
-                            AI Model Contribution
-                        </h5>
+                <div class="glass-card">
+                    <div class="card-title">
+                        <i class="fas fa-brain"></i>
+                        AI Model Metrics
                     </div>
-                    <div class="card-body">
-                        <div class="chart-container">
-                            <canvas id="modelChart"></canvas>
+                    <div>
+                        {% for label in chart_data.score_labels %}
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="metric-label">{{ label }}</span>
+                                <span class="metric-value">{{ "%.0f"|format(chart_data.score_values[loop.index0] * 100) }}%</span>
+                            </div>
+                            <div class="progress-bar-custom">
+                                <div class="progress-fill" style="width: {{ chart_data.score_values[loop.index0] * 100 }}%; background: linear-gradient(90deg, #3B82F6, #8B5CF6);"></div>
+                            </div>
                         </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Detailed Scores -->
-        <div class="card mb-4">
-            <div class="card-header py-3">
-                <h5 class="mb-0">
-                    <i class="fas fa-chart-bar me-2"></i>
-                    Detailed Score Breakdown
-                </h5>
+        <!-- Recommendations Table -->
+        <div class="glass-card">
+            <div class="card-title">
+                <i class="fas fa-list"></i>
+                Detailed Recommendations
             </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Project</th>
-                                <th>Research Area</th>
-                                <th>Difficulty</th>
-                                <th>Match %</th>
-                                <th>Content</th>
-                                <th>Research</th>
-                                <th>Tech</th>
-                                <th>Career</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for rec in recommendations %}
-                            <tr>
-                                <td>
-                                    <strong>{{ rec.title[:40] }}{% if rec.title|length > 40 %}...{% endif %}</strong>
-                                    <br>
-                                    <small class="text-muted">{{ rec.project_id }}</small>
-                                </td>
-                                <td>
-                                    <span class="badge bg-info">{{ rec.research_area }}</span>
-                                </td>
-                                <td>
-                                    <span class="badge badge-{{ rec.difficulty|lower }}">{{ rec.difficulty }}</span>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="progress flex-grow-1 me-2" style="height: 8px;">
-                                            <div class="progress-bar bg-success" style="width: {{ rec.match_percentage }}%"></div>
-                                        </div>
-                                        <small class="fw-bold">{{ rec.match_percentage }}%</small>
+            <div class="table-responsive">
+                <table class="table" style="color: var(--text);">
+                    <thead>
+                        <tr>
+                            <th>Project</th>
+                            <th>Research Area</th>
+                            <th>Difficulty</th>
+                            <th>Match</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rec in recommendations %}
+                        <tr>
+                            <td>
+                                <strong>{{ rec.title[:45] }}{% if rec.title|length > 45 %}...{% endif %}</strong>
+                                <br>
+                                <small class="text-muted">{{ rec.project_id }}</small>
+                            </td>
+                            <td><span class="badge bg-primary">{{ rec.research_area }}</span></td>
+                            <td>
+                                <span class="badge {% if rec.difficulty == 'Easy' %}bg-success{% elif rec.difficulty == 'Medium' %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ rec.difficulty }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress flex-grow-1" style="height: 6px; background: rgba(255,255,255,0.1);">
+                                        <div class="progress-bar" style="width: {{ rec.match_percentage }}%; background: linear-gradient(90deg, #10B981, #34D399);"></div>
                                     </div>
-                                </td>
-                                <td>{{ "%.2f"|format(rec.scores.content) }}</td>
-                                <td>{{ "%.2f"|format(rec.scores.research) }}</td>
-                                <td>{{ "%.2f"|format(rec.scores.tech) }}</td>
-                                <td>{{ "%.2f"|format(rec.scores.career) }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                                    <strong>{{ rec.match_percentage }}%</strong>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
-        
-        <!-- Action Buttons -->
-        <div class="text-center mt-4 mb-4">
-            <a href="/" class="btn btn-outline-light btn-lg me-3">
-                <i class="fas fa-arrow-left me-2"></i>
-                New Recommendation
-            </a>
-            <a href="/recommend" class="btn btn-primary btn-lg">
-                <i class="fas fa-redo me-2"></i>
-                View Results
-            </a>
-        </div>
-        
-        {% else %}
-        
-        <!-- No Data Message -->
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <i class="fas fa-chart-bar text-muted mb-3" style="font-size: 4rem;"></i>
-                <h3 class="fw-bold mb-3">No Analytics Available</h3>
-                <p class="text-muted mb-4">
-                    Generate recommendations first to view analytics
-                </p>
-                <a href="/" class="btn btn-primary btn-lg">
-                    <i class="fas fa-search me-2"></i>
-                    Get Recommendations
-                </a>
-            </div>
-        </div>
-        
         {% endif %}
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-{% if chart_data %}
-<script>
-    // Chart.js Configuration
-    const colors = {
-        primary: '#1a5276',
-        secondary: '#2e86c1',
-        success: '#27ae60',
-        warning: '#f39c12',
-        danger: '#e74c3c',
-        info: '#3498db',
-        purple: '#9b59b6'
-    };
+    </main>
     
-    const chartColors = [
-        colors.primary, colors.secondary, colors.success, 
-        colors.warning, colors.danger, colors.info, colors.purple
-    ];
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    // Match Percentages Bar Chart
-    new Chart(document.getElementById('matchChart'), {
-        type: 'bar',
-        data: {
-            labels: {{ chart_data.project_titles|tojson }},
-            datasets: [{
-                label: 'Match Percentage',
-                data: {{ chart_data.match_percentages|tojson }},
-                backgroundColor: chartColors,
-                borderColor: chartColors,
-                borderWidth: 1,
-                borderRadius: 8
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-bs-theme', newTheme);
+            
+            const icon = document.getElementById('themeIcon');
+            icon.className = newTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            
+            localStorage.setItem('theme', newTheme);
+        }
+        
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-bs-theme', savedTheme);
+        if (savedTheme === 'dark') {
+            document.getElementById('themeIcon').className = 'fas fa-sun';
+        }
+        
+        {% if chart_data %}
+        // Chart colors
+        const colors = ['#3B82F6', '#8B5CF6', '#EC4899', '#10B981', '#F59E0B'];
+        
+        // Match Percentages
+        new Chart(document.getElementById('matchChart'), {
+            type: 'bar',
+            data: {
+                labels: {{ chart_data.project_titles|tojson }},
+                datasets: [{
+                    label: 'Match %',
+                    data: {{ chart_data.match_percentages|tojson }},
+                    backgroundColor: colors,
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    title: {
-                        display: true,
-                        text: 'Match %'
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#94A3B8' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#94A3B8', maxRotation: 45 }
                     }
                 }
             }
-        }
-    });
-    
-    // Research Area Doughnut Chart
-    new Chart(document.getElementById('researchChart'), {
-        type: 'doughnut',
-        data: {
-            labels: {{ chart_data.area_labels|tojson }},
-            datasets: [{
-                data: {{ chart_data.area_values|tojson }},
-                backgroundColor: chartColors,
-                borderWidth: 2,
-                borderColor: '#fff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 15,
-                        usePointStyle: true
-                    }
-                }
-            }
-        }
-    });
-    
-    // Difficulty Distribution Pie Chart
-    new Chart(document.getElementById('difficultyChart'), {
-        type: 'pie',
-        data: {
-            labels: {{ chart_data.diff_labels|tojson }},
-            datasets: [{
-                data: {{ chart_data.diff_values|tojson }},
-                backgroundColor: [colors.success, colors.warning, colors.danger],
-                borderWidth: 2,
-                borderColor: '#fff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 15,
-                        usePointStyle: true
-                    }
-                }
-            }
-        }
-    });
-    
-    // AI Model Contribution Radar Chart
-    new Chart(document.getElementById('modelChart'), {
-        type: 'radar',
-        data: {
-            labels: {{ chart_data.score_labels|tojson }},
-            datasets: [{
-                label: 'Contribution',
-                data: {{ chart_data.score_values|tojson }},
-                backgroundColor: 'rgba(46, 134, 193, 0.2)',
-                borderColor: colors.secondary,
-                borderWidth: 2,
-                pointBackgroundColor: colors.secondary,
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
+        });
+        
+        // Research Areas
+        new Chart(document.getElementById('researchChart'), {
+            type: 'doughnut',
+            data: {
+                labels: {{ chart_data.area_labels|tojson }},
+                datasets: [{
+                    data: {{ chart_data.area_values|tojson }},
+                    backgroundColor: colors,
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
             },
-            scales: {
-                r: {
-                    beginAtZero: true,
-                    max: 1,
-                    ticks: {
-                        stepSize: 0.2
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#94A3B8', padding: 15 }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+        
+        // Difficulty
+        new Chart(document.getElementById('difficultyChart'), {
+            type: 'pie',
+            data: {
+                labels: {{ chart_data.diff_labels|tojson }},
+                datasets: [{
+                    data: {{ chart_data.diff_values|tojson }},
+                    backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#94A3B8', padding: 15 }
                     }
                 }
             }
-        }
-    });
-</script>
-{% endif %}
-{% endblock %}
+        });
+        {% endif %}
+    </script>
+</body>
+</html>
