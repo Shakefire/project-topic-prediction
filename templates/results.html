@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Recommendations - NAUB Project Advisor{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h1 class="display-5 fw-bold text-white mb-3">
+                <i class="fas fa-trophy me-3"></i>
+                Your Top 5 Recommendations
+            </h1>
+            <p class="lead text-white-50">
+                Based on your profile, here are the most suitable projects for you
+            </p>
+        </div>
+        
+        <!-- Student Summary Card -->
+        <div class="card mb-4">
+            <div class="card-header py-3">
+                <h5 class="mb-0">
+                    <i class="fas fa-user me-2"></i>
+                    Your Profile Summary
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <i class="fas fa-university text-primary mb-2" style="font-size: 1.5rem;"></i>
+                            <h6 class="fw-bold mb-1">Department</h6>
+                            <p class="text-muted mb-0">{{ student_profile.department }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <i class="fas fa-chart-line text-success mb-2" style="font-size: 1.5rem;"></i>
+                            <h6 class="fw-bold mb-1">CGPA</h6>
+                            <p class="text-muted mb-0">{{ student_profile.gpa }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <i class="fas fa-signal text-warning mb-2" style="font-size: 1.5rem;"></i>
+                            <h6 class="fw-bold mb-1">Level</h6>
+                            <p class="text-muted mb-0">{{ student_profile.year_level }}00 Level</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <i class="fas fa-star text-info mb-2" style="font-size: 1.5rem;"></i>
+                            <h6 class="fw-bold mb-1">Difficulty</h6>
+                            <p class="text-muted mb-0">{{ student_profile.preferred_difficulty }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Skills & Interests -->
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">
+                            <i class="fas fa-code me-2 text-primary"></i>
+                            Technical Skills
+                        </h6>
+                        <div>
+                            {% for skill in student_profile.programming_languages %}
+                            <span class="badge bg-primary me-1 mb-1">{{ skill }}</span>
+                            {% endfor %}
+                            {% for skill in student_profile.frameworks_tools %}
+                            <span class="badge bg-secondary me-1 mb-1">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">
+                            <i class="fas fa-flask me-2 text-success"></i>
+                            Research Interests
+                        </h6>
+                        <div>
+                            {% for interest in student_profile.interests %}
+                            <span class="tag-badge">{{ interest }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recommendations -->
+        {% for rec in recommendations %}
+        <div class="card mb-4 recommendation-card" style="animation-delay: {{ loop.index * 0.1 }}s;">
+            <div class="card-body p-4">
+                <div class="row align-items-start">
+                    <!-- Match Circle -->
+                    <div class="col-md-2 text-center">
+                        <div class="match-circle mx-auto mb-2">
+                            {{ rec.match_percentage }}%
+                        </div>
+                        <small class="text-muted">Match Score</small>
+                    </div>
+                    
+                    <!-- Project Details -->
+                    <div class="col-md-7">
+                        <h4 class="fw-bold mb-2">{{ rec.title }}</h4>
+                        
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <span class="badge badge-{{ rec.difficulty|lower }}">
+                                {{ rec.difficulty }}
+                            </span>
+                            <span class="badge bg-info">
+                                <i class="fas fa-microscope me-1"></i>
+                                {{ rec.research_area }}
+                            </span>
+                            <span class="badge bg-secondary">
+                                {{ rec.project_id }}
+                            </span>
+                        </div>
+                        
+                        <p class="text-muted mb-3">
+                            {{ rec.description }}
+                        </p>
+                        
+                        <!-- Research Tags -->
+                        <div class="mb-2">
+                            <small class="text-muted fw-bold">Related Topics:</small>
+                            <div class="mt-1">
+                                {% for tag in rec.research_tags.split(', ')[:5] %}
+                                <span class="badge bg-light text-dark me-1 mb-1" style="font-size: 0.75rem;">
+                                    {{ tag }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Explanation -->
+                    <div class="col-md-3">
+                        <div class="bg-light rounded p-3">
+                            <h6 class="fw-bold mb-3">
+                                <i class="fas fa-lightbulb me-2 text-warning"></i>
+                                Why Recommended?
+                            </h6>
+                            
+                            {% for explanation in rec.explanation %}
+                            <div class="explanation-item">
+                                <div class="explanation-icon">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <small>{{ explanation }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <!-- Action Buttons -->
+        <div class="text-center mt-4 mb-4">
+            <a href="/" class="btn btn-outline-light btn-lg me-3">
+                <i class="fas fa-arrow-left me-2"></i>
+                New Recommendation
+            </a>
+            <a href="/analytics" class="btn btn-primary btn-lg">
+                <i class="fas fa-chart-bar me-2"></i>
+                View Analytics
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animate cards on scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.recommendation-card').forEach(card => {
+        observer.observe(card);
+    });
+</script>
+{% endblock %}

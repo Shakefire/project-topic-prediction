@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block title %}Student Profile - NAUB Project Advisor{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h1 class="display-5 fw-bold text-white mb-3">
+                <i class="fas fa-robot me-3"></i>
+                Intelligent Project Advisor
+            </h1>
+            <p class="lead text-white-50">
+                Get personalized final year project recommendations based on your academic profile and interests
+            </p>
+        </div>
+        
+        <!-- Main Form Card -->
+        <div class="card">
+            <div class="card-header py-3">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-graduate me-2"></i>
+                    Student Profile
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <form id="recommendationForm" method="POST" action="/recommend" onsubmit="showLoading()">
+                    
+                    <!-- Academic Information Section -->
+                    <div class="mb-4">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-university me-2"></i>
+                            Academic Information
+                        </h5>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="department" class="form-label fw-semibold">Department</label>
+                                <select class="form-select" id="department" name="department" required>
+                                    <option value="">Select Department</option>
+                                    {% for dept in departments %}
+                                    <option value="{{ dept }}">{{ dept }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="year_level" class="form-label fw-semibold">Current Level</label>
+                                <select class="form-select" id="year_level" name="year_level" required>
+                                    <option value="3">300 Level</option>
+                                    <option value="4">400 Level</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="gpa" class="form-label fw-semibold">CGPA</label>
+                                <input type="number" class="form-control" id="gpa" name="gpa" 
+                                       min="1.0" max="5.0" step="0.01" value="3.0" required>
+                                <div class="form-text">Enter your cumulative GPA (1.0 - 5.0)</div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="avg_cs_grade" class="form-label fw-semibold">Avg Computing Grade</label>
+                                <input type="number" class="form-control" id="avg_cs_grade" name="avg_cs_grade" 
+                                       min="1.0" max="5.0" step="0.01" value="3.0" required>
+                                <div class="form-text">Average grade in computing courses</div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="preferred_difficulty" class="form-label fw-semibold">Preferred Difficulty</label>
+                                <select class="form-select" id="preferred_difficulty" name="preferred_difficulty" required>
+                                    <option value="Easy">Easy</option>
+                                    <option value="Medium" selected>Medium</option>
+                                    <option value="Hard">Hard</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <!-- Technical Skills Section -->
+                    <div class="mb-4">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-code me-2"></i>
+                            Technical Skills
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Programming Languages</label>
+                            <div class="row g-2">
+                                {% for lang in programming_languages %}
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               name="programming_languages" value="{{ lang }}" 
+                                               id="lang_{{ loop.index }}">
+                                        <label class="form-check-label" for="lang_{{ loop.index }}">
+                                            {{ lang }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Frameworks & Tools</label>
+                            <div class="row g-2">
+                                {% for tool in frameworks_tools %}
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               name="frameworks_tools" value="{{ tool }}" 
+                                               id="tool_{{ loop.index }}">
+                                        <label class="form-check-label" for="tool_{{ loop.index }}">
+                                            {{ tool }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <!-- Research Interests Section -->
+                    <div class="mb-4">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-flask me-2"></i>
+                            Research Interests
+                        </h5>
+                        
+                        <div class="row g-2">
+                            {% set interests_list = [
+                                'Artificial Intelligence', 'Machine Learning', 'Deep Learning',
+                                'Data Science', 'Computer Vision', 'Natural Language Processing',
+                                'Cybersecurity', 'Malware Analysis', 'Digital Forensics',
+                                'Threat Intelligence', 'Web Development', 'Mobile Development',
+                                'Networking', 'Blockchain', 'Cloud Computing',
+                                'Embedded Systems', 'Internet of Things', 'Software Engineering'
+                            ] %}
+                            
+                            {% for interest in interests_list %}
+                            <div class="col-auto">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" 
+                                           name="interests" value="{{ interest }}" 
+                                           id="interest_{{ loop.index }}">
+                                    <label class="form-check-label" for="interest_{{ loop.index }}">
+                                        {{ interest }}
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <!-- Experience Section -->
+                    <div class="mb-4">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-history me-2"></i>
+                            Previous Experience
+                        </h5>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="num_past_projects" class="form-label fw-semibold">Number of Previous Projects</label>
+                                <input type="number" class="form-control" id="num_past_projects" name="num_past_projects" 
+                                       min="0" max="10" value="0">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="past_projects" class="form-label fw-semibold">Previous Project Titles (Optional)</label>
+                                <input type="text" class="form-control" id="past_projects" name="past_projects" 
+                                       placeholder="e.g., E-commerce Website, Chat Application">
+                                <div class="form-text">Separate multiple titles with commas</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg px-5">
+                            <i class="fas fa-search me-2"></i>
+                            Get Recommendations
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Features Section -->
+        <div class="row g-4 mt-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mx-auto mb-3">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h5 class="fw-bold">AI-Powered</h5>
+                        <p class="text-muted mb-0">
+                            Uses machine learning to find the best project matches for your profile
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mx-auto mb-3">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h5 class="fw-bold">Personalized</h5>
+                        <p class="text-muted mb-0">
+                            Recommendations based on your skills, interests, and academic performance
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mx-auto mb-3">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <h5 class="fw-bold">Explainable</h5>
+                        <p class="text-muted mb-0">
+                            Understand why each project was recommended for you
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Form validation
+    document.getElementById('recommendationForm').addEventListener('submit', function(e) {
+        const gpa = parseFloat(document.getElementById('gpa').value);
+        const csGrade = parseFloat(document.getElementById('avg_cs_grade').value);
+        
+        if (gpa < 1.0 || gpa > 5.0) {
+            e.preventDefault();
+            alert('Please enter a valid CGPA between 1.0 and 5.0');
+            return;
+        }
+        
+        if (csGrade < 1.0 || csGrade > 5.0) {
+            e.preventDefault();
+            alert('Please enter a valid computing grade between 1.0 and 5.0');
+            return;
+        }
+        
+        // Check if at least one interest is selected
+        const interests = document.querySelectorAll('input[name="interests"]:checked');
+        if (interests.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one research interest');
+            return;
+        }
+    });
+    
+    // Auto-update difficulty recommendation based on GPA
+    document.getElementById('gpa').addEventListener('change', function() {
+        const gpa = parseFloat(this.value);
+        const diffSelect = document.getElementById('preferred_difficulty');
+        
+        if (gpa >= 3.5) {
+            diffSelect.value = 'Hard';
+        } else if (gpa >= 2.5) {
+            diffSelect.value = 'Medium';
+        } else {
+            diffSelect.value = 'Easy';
+        }
+    });
+</script>
+{% endblock %}

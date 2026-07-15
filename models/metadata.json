@@ -1,0 +1,7 @@
+{
+  "model_type": "xgboost_classifier",
+  "feature_count": 67,
+  "student_count": 500,
+  "project_count": 1628,
+  "training_rows": 1626
+}
